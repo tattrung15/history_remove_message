@@ -6,7 +6,6 @@
     "unlimitedStorage",
     "webRequestBlocking",
     "storage",
-    "management",
     "*://*.facebook.com/*",
     "https://*.messenger.com/*"
   ],
