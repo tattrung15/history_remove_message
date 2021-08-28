@@ -8,7 +8,7 @@
           await e.forEach((t) => {
             $("#vcc").append(
               `\n<tr>\n
-                  <td class="col-name">${t.d.f.n1}</td>\n
+                  <td class="col-name">${t.d.f ? t.d.f.n1 : "null"}</td>\n
                   <td class="col-message">${t.d.m.m}</td>\n
                   <td class="col-attachment">${
                     "n" == t.d.m.u
