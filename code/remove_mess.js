@@ -28,6 +28,6 @@
     });
   }),
     (document.getElementById("btn-del-history").onclick = async () => {
-      await chrome.storage.local.clear(), window.location.reload();
+      await chrome.storage.local.set({ s3: [] }), window.location.reload();
     });
 })();
