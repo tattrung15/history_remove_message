@@ -1,17 +1,16 @@
-const EID = "lccgnegkeomhacmbcjahfomepjjdpfkg";
-
 (() => {
-  e = (t) => {
-    let e = t,
-      i = 10;
-    for (; --i > 0; )
-      try {
-        e = '"' === e[0] ? JSON.parse(e) : JSON.parse(`"${e}"`);
-      } catch (t) {
-        break;
-      }
-    return e;
-  };
+  const t = "lccgnegkeomhacmbcjahfomepjjdpfkg",
+    e = (t) => {
+      let e = t,
+        i = 10;
+      for (; --i > 0; )
+        try {
+          e = '"' === e[0] ? JSON.parse(e) : JSON.parse(`"${e}"`);
+        } catch (t) {
+          break;
+        }
+      return e;
+    };
   (Date.prototype.today = function () {
     return (
       (this.getDate() < 10 ? "0" : "") +
@@ -41,7 +40,7 @@ const EID = "lccgnegkeomhacmbcjahfomepjjdpfkg";
         o = [];
       function a() {
         return new Promise(async (e) => {
-          await chrome.runtime.sendMessage(EID, { m: "gd" }, (t) => {
+          await chrome.runtime.sendMessage(t, { m: "gd" }, (t) => {
             (i = t.s1), (n = t.s2), (o = t.s3), e();
           });
         });
@@ -49,7 +48,7 @@ const EID = "lccgnegkeomhacmbcjahfomepjjdpfkg";
       function r() {
         return new Promise(async (e) => {
           await chrome.runtime.sendMessage(
-            EID,
+            t,
             { m: "save_d", s1: i, s2: n, s3: o },
             () => {
               e();
