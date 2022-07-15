@@ -1,20 +1,13 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "History Remove Message",
-  "permissions": [
-    "webRequest",
-    "unlimitedStorage",
-    "webRequestBlocking",
-    "storage",
-    "*://*.facebook.com/*",
-    "https://*.messenger.com/*"
-  ],
+  "description": "Xem các tin nhắn đã bị gỡ",
   "version": "1.0",
   "icons": {
     "128": "logo.png",
     "16": "logo.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": "logo.png",
     "default_popup": "./popup/popup.html"
   },
@@ -32,10 +25,10 @@
       "all_frames": true
     }
   ],
-  "background": {
-    "persistent": true,
-    "scripts": ["background.js"]
-  },
-  "description": "Xem các tin nhắn đã bị gỡ",
-  "web_accessible_resources": ["injectws.js"]
+  "web_accessible_resources": [
+    {
+      "resources": ["injectws.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
