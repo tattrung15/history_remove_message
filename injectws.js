@@ -1,3 +1,7 @@
+let rvdfm_all_msgs = [];
+let rvdfm_all_users = [];
+const users_data = [];
+
 (function () {
   const OriginalWebSocket = window.WebSocket;
 
@@ -28,10 +32,10 @@
         const haveMsgId = /(?=mid\.\$)(.*?)(?=\\")/.exec(utf8_str);
 
         if (!haveMsgId) {
-          const users_data = [];
-
           const user_data_zones =
-            /(?=\(LS.sp\(\\"25\\")(.*?)(?=:LS.resolve)/gm.exec(utf8_str);
+            /(?<=\(LS.sp\(\\"deleteThenInsertContact\\")(.*?)(?=:LS.resolve)/gm.exec(
+              utf8_str
+            );
 
           if (user_data_zones != null) {
             user_data_zones.forEach((zone) => {
@@ -40,39 +44,56 @@
               );
               const avatars = /(?=https)(.*?)(?=\\",)/g.exec(zone);
               const small_avatar = parse(avatars[0]);
-              const big_avatar = parse(avatars[1]);
+              // const big_avatar = parse(avatars[1]);
 
-              const user_msg_id = /(?<=, )(.*?)(?=,\[0,1\],)/gm.exec(zone);
+              // const user_msg_id = /(?<=, )(.*?)(?=,\[0,1\],)/gm.exec(zone);
+
+              const regex_display_name = /(?<=\],\\").*?(?=\\",\\")/gm;
+
+              const display_name = zone.match(regex_display_name).slice(-1)[0];
+
+              const user_info = {
+                avatar: small_avatar,
+                user_id: user_id[0],
+                display_name: parse(display_name),
+              };
+
+              if (
+                !users_data.find((item) => item.user_id === user_info.user_id)
+              ) {
+                users_data.push(user_info);
+              }
             });
           }
 
-          for (let i = 0; i < all_strings.length; i++) {
-            const str_i = all_strings[i];
+          // for (let i = 0; i < all_strings.length; i++) {
+          //   const str_i = all_strings[i];
 
-            // Thông tin người dùng
-            if (str_i === "13" && all_strings[i + 1] === "25") {
-              const small_avatar = all_strings[i + 2];
-              const large_avatar = all_strings[i + 4];
-              const user_id = /(?<=\?entity_id=).*?(?=\&entity_type)/.exec(
-                all_strings[i + 3]
-              )[0];
-              const full_user_name = all_strings[i + 6];
-              const short_user_name = all_strings[i + 8];
-              const unknown_id = all_strings[i + 9];
+          //   // Thông tin người dùng
+          //   if (str_i === "13" && all_strings[i + 1] === "25") {
+          //     console.log("---------------------------------------");
+          //     const small_avatar = all_strings[i + 2];
+          //     const large_avatar = all_strings[i + 4];
+          //     const user_id = /(?<=\?entity_id=).*?(?=\&entity_type)/.exec(
+          //       all_strings[i + 3]
+          //     )[0];
+          //     const full_user_name = all_strings[i + 6];
+          //     const short_user_name = all_strings[i + 8];
+          //     const unknown_id = all_strings[i + 9];
 
-              // Có những event bắt đầu bằng 13 ,25 nhưng không có user name => loại
-              if (full_user_name) {
-                users_data.push({
-                  user_id,
-                  small_avatar,
-                  large_avatar,
-                  full_user_name,
-                  short_user_name,
-                  unknown_id,
-                });
-              }
-            }
-          }
+          //     // Có những event bắt đầu bằng 13 ,25 nhưng không có user name => loại
+          //     if (full_user_name) {
+          //       users_data.push({
+          //         user_id,
+          //         small_avatar,
+          //         large_avatar,
+          //         full_user_name,
+          //         short_user_name,
+          //         unknown_id,
+          //       });
+          //     }
+          //   }
+          // }
         }
 
         const all_strings_regex = /(\\\")(.*?)(\\\")(?=[,)])/g;
@@ -83,11 +104,11 @@
           // Lấy ra request id: Đây chỉ là mã định danh cho request, tăng dần đều qua từng request...
           const request_id = /(?<=\"request_id\":)(.*?)(?=,)/.exec(utf8_str)[0];
 
-          console.log("Mọi thông tin: ", {
-            request_id,
-            all: all_strings,
-            utf8_str,
-          });
+          // console.log("Mọi thông tin: ", {
+          //   request_id,
+          //   all: all_strings,
+          //   utf8_str,
+          // });
         } else {
           // Không có thông tin gì thì thoát luôn
           return;
@@ -97,6 +118,10 @@
         let chat = [];
         for (let i = 0; i < all_strings.length; i++) {
           const str_i = all_strings[i];
+
+          // console.log("-------------------------------------------");
+          // console.log(str_i);
+          // console.log("-------------------------------------------");
 
           // Tin nhắn chữ
           if (str_i === "insertMessage" && isMsgIdStr(all_strings[i + 2])) {
@@ -252,6 +277,8 @@
                 .map((_c) => c.type || "không rõ loại")
                 .join(",");
 
+              console.log(deleted_msg_type);
+
               // log.text(
               //   `> Tin nhắn thu hồi: (${deleted_msg_type})`,
               //   "black",
@@ -260,8 +287,6 @@
               console.log(
                 c.msgs || "(RVDFM: không có dữ liệu cho tin nhắn này)"
               );
-
-              rvdfmSendDeletedMsgToContentJs(c.msgs);
             }
 
             // Tin nhắn thả/gỡ react
