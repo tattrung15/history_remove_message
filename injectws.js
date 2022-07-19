@@ -186,6 +186,26 @@ const users_data = [];
             }
           }
 
+          // Chia sẻ bài viết
+          if (
+            all_strings[i + 1] === "insertMessage" &&
+            isMsgIdStr(all_strings[i + 2]) &&
+            all_strings[i + 5] === "insertXmaAttachment"
+          ) {
+            const data =
+              /(?=https)(.*?)(?=")/gm.exec(all_strings[i + 35]) ||
+              /(?=https)(.*?)(?=")/gm.exec(all_strings[i + 36]);
+            const link = parse(data[0]);
+            if (link) {
+              chat.push({
+                type: "Chia sẻ",
+                content: link,
+                id: all_strings[i + 2],
+              });
+              storeChat(chat);
+            }
+          }
+
           // Thả react
           // if (str_i === "upsertReaction" && isMsgIdStr(all_strings[i + 1])) {
           //   chat.push({
