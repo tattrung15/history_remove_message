@@ -1,7 +1,9 @@
-var s = document.createElement("script");
-(s.src = chrome.extension.getURL("./injectws.js")),
-  (s.onload = function () {
-    this.parentNode.removeChild(this);
-  });
-let doc = document.body || document.documentElement;
-doc.appendChild(s);
+const injectWsScript = document.createElement("script");
+injectWsScript.src = chrome.runtime.getURL("./injectws.js");
+
+injectWsScript.onload = function () {
+  this.parentNode.removeChild(this);
+};
+
+const doc = document.body || document.head || document.documentElement;
+doc.appendChild(injectWsScript);

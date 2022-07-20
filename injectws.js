@@ -1,224 +1,383 @@
-(() => {
-  const t = "lccgnegkeomhacmbcjahfomepjjdpfkg",
-    e = (t) => {
-      let e = t,
-        i = 10;
-      for (; --i > 0; )
-        try {
-          e = '"' === e[0] ? JSON.parse(e) : JSON.parse(`"${e}"`);
-        } catch (t) {
-          break;
-        }
-      return e;
-    };
-  (Date.prototype.today = function () {
-    return (
-      (this.getDate() < 10 ? "0" : "") +
-      this.getDate() +
-      "/" +
-      (this.getMonth() + 1 < 10 ? "0" : "") +
-      (this.getMonth() + 1) +
-      "/" +
-      this.getFullYear()
-    );
-  }),
-    (Date.prototype.timeNow = function () {
-      return (
-        (this.getHours() < 10 ? "0" : "") +
-        this.getHours() +
-        ":" +
-        (this.getMinutes() < 10 ? "0" : "") +
-        this.getMinutes() +
-        ":" +
-        (this.getSeconds() < 10 ? "0" : "") +
-        this.getSeconds()
-      );
-    }),
-    (async function () {
-      let i = {};
-      var n = {},
-        o = [];
-      function a() {
-        return new Promise(async (e) => {
-          await chrome.runtime.sendMessage(t, { m: "gd" }, (t) => {
-            (i = t.s1), (n = t.s2), (o = t.s3), e();
-          });
-        });
+const ID = "egnmoeokeemdcejgbkcfjiddandoipbk";
+
+let rvdfm_all_msgs = [];
+let rvdfm_removed_msgs = [];
+const users_data = [];
+
+(async function () {
+  const sendMessage = async (message, callback) => {
+    await chrome.runtime.sendMessage(ID, message, (data) => {
+      callback(data);
+    });
+  };
+
+  const OriginalWebSocket = window.WebSocket;
+
+  const isMsgIdStr = (str = "") => str.startsWith("mid.$");
+  const isLink = (str = "") => str.startsWith("https://");
+
+  const parse = (str = "") => {
+    let ret = str;
+    let limit = 10;
+    while (--limit > 0) {
+      try {
+        if (ret[0] === '"') ret = JSON.parse(ret);
+        else ret = JSON.parse(`"${ret}"`);
+      } catch (e) {
+        break;
       }
-      function r() {
-        return new Promise(async (e) => {
-          await chrome.runtime.sendMessage(
-            t,
-            { m: "save_d", s1: i, s2: n, s3: o },
-            () => {
-              e();
+    }
+    return ret;
+  };
+
+  const storeChat = (chat = []) => {
+    chat = chat.map((item) => ({ ...item, time: Date.now() }));
+    for (let i = 0; i < chat.length; i++) {
+      const isDuplicated =
+        -1 !== rvdfm_all_msgs.findIndex((_msg) => chat[i].id === _msg.id);
+
+      if (!isDuplicated) {
+        rvdfm_all_msgs = rvdfm_all_msgs.concat(chat);
+      }
+    }
+  };
+
+  window.WebSocket = function fakeConstructor(dt, config) {
+    const webSocketInstant = new OriginalWebSocket(dt, config);
+
+    webSocketInstant.addEventListener("message", async function (achunk) {
+      const utf8_str = new TextDecoder("utf-8").decode(achunk.data);
+
+      if (utf8_str[0] === "1" || utf8_str[0] === "2" || utf8_str[0] === "3") {
+        const haveMsgId = /(?=mid\.\$)(.*?)(?=\\")/.exec(utf8_str);
+
+        // if (!haveMsgId) {
+        //   const user_data_zones =
+        //     /(?<=\(LS.sp\(\\"deleteThenInsertContact\\")(.*?)(?=:LS.resolve)/gm.exec(
+        //       utf8_str
+        //     );
+
+        //   if (user_data_zones != null) {
+        //     user_data_zones.forEach((zone) => {
+        //       const user_id = /(?<=\?entity_id=)(.*?)(?=\&entity_type)/.exec(
+        //         zone
+        //       );
+        //       const avatars = /(?=https)(.*?)(?=\\",)/g.exec(zone);
+        //       const small_avatar = parse(avatars[0]);
+        //       // const big_avatar = parse(avatars[1]);
+
+        //       // const user_msg_id = /(?<=, )(.*?)(?=,\[0,1\],)/gm.exec(zone);
+
+        //       const regex_display_name = /(?<=\],\\").*?(?=\\",\\")/gm;
+
+        //       const display_name = zone.match(regex_display_name).slice(-1)[0];
+
+        //       const user_info = {
+        //         avatar: small_avatar,
+        //         user_id: user_id[0],
+        //         display_name: parse(display_name),
+        //       };
+
+        //       if (
+        //         !users_data.find((item) => item.user_id === user_info.user_id)
+        //       ) {
+        //         users_data.push(user_info);
+        //       }
+        //     });
+        //   }
+
+        //   for (let i = 0; i < all_strings.length; i++) {
+        //     const str_i = all_strings[i];
+
+        //     // Thông tin người dùng
+        //     if (str_i === "13" && all_strings[i + 1] === "25") {
+        //       const small_avatar = all_strings[i + 2];
+        //       const large_avatar = all_strings[i + 4];
+        //       const user_id = /(?<=\?entity_id=).*?(?=\&entity_type)/.exec(
+        //         all_strings[i + 3]
+        //       )[0];
+        //       const full_user_name = all_strings[i + 6];
+        //       const short_user_name = all_strings[i + 8];
+        //       const unknown_id = all_strings[i + 9];
+
+        //       // Có những event bắt đầu bằng 13 ,25 nhưng không có user name => loại
+        //       if (full_user_name) {
+        //         users_data.push({
+        //           user_id,
+        //           small_avatar,
+        //           large_avatar,
+        //           full_user_name,
+        //           short_user_name,
+        //           unknown_id,
+        //         });
+        //       }
+        //     }
+        //   }
+        // }
+
+        const all_strings_regex = /(\\\")(.*?)(\\\")(?=[,)])/g;
+        let all_strings = utf8_str.match(all_strings_regex) || [];
+        all_strings = all_strings.map((str) => parse(str));
+
+        if (all_strings.length) {
+          // Lấy ra request id: Đây chỉ là mã định danh cho request, tăng dần đều qua từng request...
+          const request_id = /(?<=\"request_id\":)(.*?)(?=,)/.exec(utf8_str)[0];
+
+          // console.log("Mọi thông tin: ", {
+          //   request_id,
+          //   all: all_strings,
+          //   utf8_str,
+          // });
+        } else {
+          // Không có thông tin gì thì thoát luôn
+          return;
+        }
+
+        // Bắt đầu lấy ra những tin nhắn từ lượng thông tin trên
+        let chat = [];
+        for (let i = 0; i < all_strings.length; i++) {
+          const str_i = all_strings[i];
+
+          // Tin nhắn chữ
+          if (str_i === "insertMessage" && isMsgIdStr(all_strings[i + 2])) {
+            const content = all_strings[i + 1];
+            if (content) {
+              chat.push({
+                type: "Chữ",
+                content: content,
+                attachments: [],
+                id: all_strings[i + 2],
+              });
+              storeChat(chat);
             }
-          );
-        });
-      }
-      function s(t) {
-        for (const e of t) {
-          let t = /(?<=\?entity_id=)(.*?)(?=&entity_type)/gm,
-            i = e.match(t)[1],
-            o =
-              "https://graph.facebook.com/" +
-              i +
-              "/picture?type=large&access_token=6628568379|c1e620fa708a1d5696fb991c1bde5662",
-            a = /(?<=, )(.*?)(?=,\[0,1\],)/gm,
-            r = e.match(a)[0].replace("\n", "").replace(" ", ""),
-            s = /(?<=\],\\").*?(?=\\",\\")/gm;
-          if (3 == e.match(s).length) {
-            let t = e.match(s).slice(-1)[0];
-            (t = JSON.parse(`"${JSON.parse(`"${t}"`)}"`)),
-              (n[r] = { n1: t, i: o, id: r, uid: i });
           }
-        }
-      }
-      function c(t, e) {
-        let i,
-          o = t.indexOf("594"),
-          a = (function (t, e, i) {
-            var n = t.length;
-            if (0 == n) return [];
-            for (var o, a = 0; (o = e.indexOf(t, a)) > -1; ) {
-              if (o > i) return o;
-              a = o + n;
-            }
-            return -1;
-          })(e, t, o),
-          r = t.substring(o, a),
-          s = /(?<=\[)(.*?)(?=\])/g,
-          c = r.match(s) || [],
-          f = "g";
-        for (const t of c) {
-          let e = `[${t}]`;
-          if (void 0 !== n[e]) {
-            (f = "p2p"), (i = n[e]);
-            break;
-          }
-        }
-        if ("g" == f) {
-          (a = o),
-            (o = t.indexOf("144")),
-            (r = t.substring(o, a)),
-            (c = r.match(s) || []);
-          for (const t of c) {
-            let e = `[${t}]`;
-            if (void 0 !== n[e]) {
-              (f = "g"), (i = n[e]);
-              break;
-            }
-          }
-        }
-        return [i, f];
-      }
-      await a();
-      var f = window.WebSocket,
-        d = f.apply.bind(f),
-        u = f.prototype.addEventListener;
-      (u = u.call.bind(u)),
-        (window.WebSocket = function t(n, h) {
-          var m;
-          return (
-            (m =
-              this instanceof t
-                ? 1 === arguments.length
-                  ? new f(n)
-                  : arguments.length >= 2
-                  ? new f(n, h)
-                  : new f()
-                : d(this, arguments)),
-            u(m, "message", async function (t) {
-              let n = new TextDecoder("utf-8").decode(t.data);
-              if ("1" == n[0] || "2" == n[0] || "3" == n[0]) {
-                if (!n.match(/(?=mid\.\$)(.*?)(?=\\")/)) {
-                  if ("1" == n[0]) {
-                    let t = /(?<=\(LS.sp\(\\"25\\")(.*?)(?=:LS.resolve)/gm,
-                      e = n.match(t);
-                    return void (null != e && (await a(), s(e), await r()));
-                  }
-                  return;
-                }
-                const t = /(\\\")(.*?)(\\\")(?=[,)])/g;
-                let f = n.match(t) || [];
-                f = f.map((t) => e(t));
-                const d = (t) => t?.startsWith("mid.$"),
-                  u = (t) => t?.startsWith("https://");
-                for (let t = 0; t < f.length; t++) {
-                  const e = f[t];
-                  if (("124" === e || "123" === e) && d(f[t + 2])) {
-                    const e = f[t + 1];
-                    let n = new Date();
-                    const o = n.today() + " " + n.timeNow();
-                    e &&
-                      (await a(),
-                      (i[f[t + 2]] = {
-                        ti: o,
-                        m: e,
-                        t: "t",
-                        u: "n",
-                        id: f[t + 2],
-                      }),
-                      await r());
-                  }
-                  if ("591" === e && u(f[t + 2])) {
-                    let e = new Date();
-                    const n = e.today() + " " + e.timeNow();
-                    for (let e = t; e < f.length - 1; e++)
-                      if (d(f[e])) {
-                        (i[f[e]] = {
-                          ti: n,
-                          m: "",
-                          t: "a",
-                          u: f[t + 2],
-                          id: f[e],
-                        }),
-                          await r();
-                        break;
-                      }
-                  }
-                  if (
-                    ("144" === e &&
-                      d(f[t + 1]) &&
-                      ((i[f[t + 1]] = {
-                        ti: new Date().today() + " " + new Date().timeNow(),
-                        m: "",
-                        t: "a",
-                        u: f[t + 3],
-                        id: f[t + 1],
-                      }),
-                      await r()),
-                    "414" === e && d(f[t + 2]) && u(f[t + 5]))
-                  ) {
-                    const e = f[t + 5];
-                    (i[f[t + 2]] = {
-                      ti: new Date().today() + " " + new Date().timeNow(),
-                      m: "",
-                      t: "a",
-                      u: e,
-                      id: f[t + 2],
-                    }),
-                      await r();
-                  }
-                  if ("594" === e && d(f[t + 1])) {
-                    const e = f[t + 1];
-                    if (void 0 !== i[e]) {
-                      let [a, s] = c(n, f[t + 1]);
-                      o.push({ t: s, id: e, d: { m: i[e], f: a } }), await r();
-                    }
-                  }
-                }
+
+          // Tin nhắn đính kèm: image / gif / video / âm thanh / file
+          if (
+            str_i === "insertMessage" &&
+            all_strings[i + 4] === "insertBlobAttachment" &&
+            isLink(all_strings[i + 6])
+          ) {
+            const attachmentIndex = [];
+
+            all_strings.forEach((item, index) => {
+              if (item === "insertBlobAttachment") {
+                attachmentIndex.push(index);
               }
-            }),
-            m
-          );
-        }.bind()),
-        (window.WebSocket.prototype = f.prototype),
-        (window.WebSocket.prototype.constructor = window.WebSocket);
-      var h = f.prototype.send;
-      (h = h.apply.bind(h)),
-        (f.prototype.send = function (t) {
-          return h(this, arguments);
-        });
-    })();
+            });
+
+            const attachments = [];
+            for (let j = 0; j < attachmentIndex.length; j++) {
+              attachments.push(all_strings[attachmentIndex[j] + 2]);
+            }
+            chat.push({
+              type: "Đính kèm",
+              content: "",
+              attachments,
+              id: all_strings[i + 1],
+            });
+            storeChat(chat);
+          }
+
+          // Tin nhắn nhãn dán
+          if (str_i === "insertMessage" && isMsgIdStr(all_strings[i + 1])) {
+            const attachment = parse(
+              /(?=https)(.*?)(?=")/gm.exec(all_strings[i + 9])[0]
+            );
+            if (attachment) {
+              chat.push({
+                type: "Nhãn dán",
+                content: "",
+                attachments: [attachment],
+                id: all_strings[i + 1],
+              });
+              storeChat(chat);
+            }
+          }
+
+          // Chia sẻ bài viết
+          if (
+            all_strings[i + 1] === "insertMessage" &&
+            isMsgIdStr(all_strings[i + 2]) &&
+            all_strings[i + 5] === "insertXmaAttachment"
+          ) {
+            const data =
+              /(?=https)(.*?)(?=")/gm.exec(all_strings[i + 35]) ||
+              /(?=https)(.*?)(?=")/gm.exec(all_strings[i + 36]);
+            const link = parse(data[0]);
+            if (link) {
+              chat.push({
+                type: "Chia sẻ",
+                content: link,
+                id: all_strings[i + 2],
+              });
+              storeChat(chat);
+            }
+          }
+
+          // Thả react
+          // if (str_i === "upsertReaction" && isMsgIdStr(all_strings[i + 1])) {
+          //   chat.push({
+          //     type: "Thả react",
+          //     content: all_strings[i + 2],
+          //     id: all_strings[i + 1],
+          //   });
+          // }
+
+          // Gỡ react
+          // if (str_i === "deleteReaction" && isMsgIdStr(all_strings[i + 1])) {
+          //   const id = all_strings[i + 1];
+          //   const content =
+          //     rvdfm_all_msgs.find((c) => c.id === id)?.content || "";
+
+          //   chat.push({
+          //     type: "Gỡ react",
+          //     content: content,
+          //     id: id,
+          //   });
+          // }
+
+          // Tin nhắn chia sẻ vị trí / vị trí trực tiếp
+          // if (
+          //   str_i === "xma_live_location_sharing" &&
+          //   isMsgIdStr(all_strings[i - 2]) &&
+          //   isLink(all_strings[i + 1])
+          // ) {
+          //   const link = all_strings[i + 1];
+
+          //   chat.push({
+          //     type: "Chia sẻ",
+          //     content: link,
+          //     id: all_strings[i - 2],
+          //   });
+          //   storeChat(chat);
+          // }
+
+          // Thông tin user
+          // if (str_i === "533" && isLink(all_strings[i + 1])) {
+          //   const avatar = all_strings[i + 1];
+          //   const user_name = all_strings[i + 2];
+
+          //   chat.push({
+          //     type: "Người dùng",
+          //     avatar: avatar,
+          //     name: user_name,
+          //   });
+          // }
+
+          // Tin nhắn đang chờ
+          // if (str_i === "130" && all_strings[i + 3] === "pending") {
+          //   chat.push({
+          //     type: "Tin nhắn đang chờ",
+          //     content: all_strings[i + 1],
+          //     avatar: all_strings[i + 2],
+          //   });
+          // }
+
+          // Thu hồi tin nhắn
+          if (
+            str_i === "deleteThenInsertMessage" &&
+            isMsgIdStr(all_strings[i + 2])
+          ) {
+            const display_name = all_strings[i + 9].slice(
+              0,
+              all_strings[i + 9].indexOf(" đã thu hồi một tin nhắn")
+            );
+
+            const id = all_strings[i + 2];
+            const msgs =
+              rvdfm_all_msgs.filter(
+                (c) => c.id === id && c.type !== "Thu hồi"
+              ) || [];
+
+            chat.push({
+              type: "Thu hồi",
+              msgs: msgs,
+              id,
+              display_name,
+            });
+            storeChat(chat);
+            rvdfm_removed_msgs.push({
+              type: "Thu hồi",
+              msgs: msgs,
+              id,
+              display_name,
+            });
+
+            if (msgs.length) {
+              const typeConversation = id[5] === "g" ? "Group" : "P2P";
+              const date = new Date(msgs[0].time);
+              const dateTime = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}-${
+                date.getMonth() + 1
+              }-${date.getFullYear()}`;
+              const message = {
+                id,
+                display_name,
+                content: msgs[0].content,
+                attachments: msgs[0].attachments,
+                type: typeConversation,
+                time: dateTime,
+              };
+              await sendMessage({ type: "save", message });
+            }
+          }
+        }
+
+        // Chèn thời gian hiện tại vào
+        // chat = chat.map((_) => ({ ..._, time: Date.now() }));
+
+        // Lưu vào rvdfm_all_msgs
+        // const old_length = rvdfm_all_msgs.length;
+        // for (let c of chat) {
+        //   let isDuplicated =
+        //     -1 !== rvdfm_all_msgs.findIndex((_msg) => c.id === _msg.id);
+
+        //   if (!isDuplicated) {
+        //     rvdfm_all_msgs = rvdfm_all_msgs.concat(chat);
+
+        //     // Tin nhắn thu hồi
+        //     if (c.type === "Thu hồi") {
+        //       const deleted_msg_type = c.msgs
+        //         .map((_c) => c.type || "không rõ loại")
+        //         .join(",");
+
+        //       // log.text(
+        //       //   `> Tin nhắn thu hồi: (${deleted_msg_type})`,
+        //       //   "black",
+        //       //   "#f35369"
+        //       // );
+        //       // console.log(
+        //       //   c.msgs || "(RVDFM: không có dữ liệu cho tin nhắn này)"
+        //       // );
+        //     } else if (c.type == "Thả react" || c.type === "Gỡ react") {
+        //       const target_msg = rvdfm_all_msgs.filter(
+        //         (_msg) => _msg.id === c.id
+        //       );
+
+        //       // log.text(`> ${c.type}:`, "black", "yellow");
+        //       // console.log(
+        //       //   target_msg || "(RVDFM: không có dữ liệu cho tin nhắn này)"
+        //       // );
+        //     }
+        //   }
+        // }
+
+        // Hiển thị thông tin lưu tin nhắn mới
+        // const new_lenght = rvdfm_all_msgs.length;
+        // const new_msg_count = new_lenght - old_length;
+        // if (new_msg_count) {
+        //   // rvdfmSendSavedCounterToContentJs(new_msg_count, new_lenght);
+        //   // log.text(
+        //   //   `> RVDFM Đã lưu ${new_msg_count} tin nhắn mới! (${new_lenght})`,
+        //   //   "green"
+        //   // );
+        // }
+      }
+    });
+
+    return webSocketInstant;
+  };
+
+  window.WebSocket.prototype = OriginalWebSocket.prototype;
+  window.WebSocket.prototype.constructor = window.WebSocket;
 })();

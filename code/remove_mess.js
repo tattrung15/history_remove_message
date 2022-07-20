@@ -1,33 +1,39 @@
 (() => {
   "use strict";
   $(document).ready(async () => {
-    await chrome.storage.local.get(["s3"], async function (t) {
-      if (void 0 !== t.s3) {
-        let e = t.s3;
-        (e = e.reverse()),
-          await e.forEach((t) => {
-            $("#vcc").append(
-              `\n<tr>\n
-                  <td class="col-name">${t.d.f ? t.d.f.n1 : "null"}</td>\n
-                  <td class="col-message">${t.d.m.m}</td>\n
-                  <td class="col-attachment">${
-                    "n" == t.d.m.u
-                      ? "Không có"
-                      : `<a target="_blank" href="${t.d.m.u}"
-                        >
-                        Attachment
-                      </a>`
-                  }</td>\n
-                  <td class="col-type">${t.t == "g" ? "Group" : "P2P"}</td>\n
-                  <td class="col-time">${t.d.m.ti}</td>\n
+    await chrome.storage.local.get("messages", async function (data) {
+      if (data.messages) {
+        let messages = data.messages;
+        messages = messages.reverse();
+        await messages.forEach((msg) => {
+          let attachments = "Không có";
+
+          if (msg.attachments.length) {
+            attachments = "";
+            msg.attachments.forEach((item) => {
+              attachments += `<a target="_blank" href="${item}">
+                                  Attachment
+                                </a></br>`;
+            });
+          }
+
+          $("#vcc").append(
+            `\n<tr>\n
+                  <td class="col-name">${msg.display_name}</td>\n
+                  <td class="col-message">${msg.content}</td>\n
+                  <td class="col-attachment">${attachments}</td>\n 
+                  <td class="col-type">${msg.type}</td>\n
+                  <td class="col-time">${msg.time}</td>\n
                   </tr>\n
                 `
-            );
-          });
+          );
+        });
       }
     });
-  }),
-    (document.getElementById("btn-del-history").onclick = async () => {
-      await chrome.storage.local.set({ s3: [] }), window.location.reload();
+
+    $("#btn-del-history").click(async () => {
+      await chrome.storage.local.set({ messages: [] });
+      window.location.reload();
     });
+  });
 })();
