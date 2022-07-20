@@ -1,7 +1,16 @@
+const ID = "gneiehccbohppanambekhcmmbjphhdca";
+
 let rvdfm_all_msgs = [];
+let rvdfm_removed_msgs = [];
 const users_data = [];
 
-(function () {
+(async function () {
+  const sendMessage = async (message, callback) => {
+    await chrome.runtime.sendMessage(ID, message, (data) => {
+      callback(data);
+    });
+  };
+
   const OriginalWebSocket = window.WebSocket;
 
   const isMsgIdStr = (str = "") => str.startsWith("mid.$");
@@ -281,19 +290,36 @@ const users_data = [];
                 (c) => c.id === id && c.type !== "Thu hồi"
               ) || [];
 
-            // chat.push({
-            //   type: "Thu hồi",
-            //   msgs: msgs,
-            //   id,
-            //   display_name,
-            // });
-            // storeChat(chat);
-            console.log({
+            chat.push({
               type: "Thu hồi",
               msgs: msgs,
               id,
               display_name,
             });
+            storeChat(chat);
+            rvdfm_removed_msgs.push({
+              type: "Thu hồi",
+              msgs: msgs,
+              id,
+              display_name,
+            });
+
+            if (msgs.length) {
+              const typeConversation = id[5] === "g" ? "Group" : "P2P";
+              const date = new Date(msgs[0].time);
+              const dateTime = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}-${
+                date.getMonth() + 1
+              }-${date.getFullYear()}`;
+              const message = {
+                id,
+                display_name,
+                content: msgs[0].content,
+                attachments: msgs[0].attachments,
+                type: typeConversation,
+                time: dateTime,
+              };
+              await sendMessage({ type: "save", message });
+            }
           }
         }
 

@@ -14,6 +14,11 @@
   "externally_connectable": {
     "matches": ["*://*.facebook.com/*", "*://*.messenger.com/*"]
   },
+  "permissions": ["unlimitedStorage", "storage"],
+  "host_permissions": ["*://*.facebook.com/*", "https://*.messenger.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "js": ["./inject_worker.js"],
