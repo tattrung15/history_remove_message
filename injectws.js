@@ -7,7 +7,7 @@ const users_data = [];
 (async function () {
   const sendMessage = async (message, callback) => {
     await chrome.runtime.sendMessage(ID, message, (data) => {
-      callback(data);
+      callback && callback(data);
     });
   };
 
@@ -209,6 +209,7 @@ const users_data = [];
               chat.push({
                 type: "Chia sẻ",
                 content: link,
+                attachments: [],
                 id: all_strings[i + 2],
               });
               storeChat(chat);
